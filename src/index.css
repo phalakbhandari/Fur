@@ -1,0 +1,347 @@
+/* Self-hosted variable fonts. No network request to a font CDN, and the
+   optical-size axis means the same face works at 13px and at 180px. */
+@import '@fontsource-variable/fraunces/opsz.css';
+@import '@fontsource-variable/inter/wght.css';
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Tokens
+
+   Two rules hold this together. Colour is named for what it *is* — ochre,
+   cream, ink — and components reference those names rather than hex values,
+   so a palette change is one file. And every pairing used for text has been
+   checked against WCAG AA; the ratios are noted where they are close.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Brand.
+     ochre-deep is a *surface* colour — a hover fill for ochre elements. It is
+     never text: at 2.4:1 on cream it fails AA at any size. Text on an ochre
+     ground is always ink. */
+  --color-ochre: #ebb042;
+  --color-ochre-deep: #cf9530;
+  --color-ochre-wash: #f7e7c6;
+
+  /* Grounds and surfaces */
+  --color-cream: #faf6f0; /* the page itself */
+  --color-paper: #ffffff; /* raised above the page */
+  --color-linen: #f2ece3; /* recessed below it */
+
+  /* Ink */
+  --color-ink: #222222; /* 14.8:1 on cream, 8.2:1 on ochre */
+
+  /* Secondary text. Chosen so it clears 4.5:1 on the *lightest* ground it is
+     ever set on (sky, at 5.5:1) rather than only on cream — the first pick
+     passed on cream and quietly failed on the tag chips. Not for use on
+     ochre, where it only reaches 3.4:1; use ink there. */
+  --color-ink-muted: #5c564e;
+
+  /* Rules, dividers, and large text only. Deliberately below 4.5:1. */
+  --color-ink-faint: #867e74;
+
+  /* Accents */
+  --color-sage: #c2ceb7;
+  --color-sage-wash: #e6ebe1;
+  --color-mist: #eaf0fb; /* the blue card ground */
+  --color-sky: #d3e3ec; /* tags and highlights */
+  --color-brick: #a6402a; /* errors — 5.8:1 on cream */
+  --color-moss: #3f6b45; /* affirmative — 5.7:1 on cream. The colour it
+                            replaces sat at 3.7:1 and failed AA. */
+
+  /* Type */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
+
+  /* Elevation. Warm-tinted rather than neutral grey, so cards sit on the
+     cream ground instead of floating above a different colour temperature. */
+  --shadow-soft: 0 1px 2px rgba(34, 26, 16, 0.04), 0 2px 8px -2px rgba(34, 26, 16, 0.05);
+  --shadow-card: 0 1px 2px rgba(34, 26, 16, 0.04), 0 12px 32px -12px rgba(34, 26, 16, 0.12);
+  --shadow-lift: 0 2px 4px rgba(34, 26, 16, 0.05), 0 24px 48px -16px rgba(34, 26, 16, 0.18);
+
+  --radius-card: 20px;
+  --radius-panel: 28px;
+
+  /* One easing everywhere. Motion that shares a curve reads as one system. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    /* Reserve the scrollbar at all times, so locking scroll for a dialog
+       does not shift the page sideways underneath it. */
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings:
+      'cv05' 1,
+      'ss03' 1; /* single-storey g, rounder quotes */
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Keyboard users get a ring; mouse users do not. Ink on light grounds,
+     switched to cream by .on-ochre where the ground is dark enough to need it. */
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-ochre);
+    color: var(--color-ink);
+  }
+
+  img {
+    max-width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Type utilities
+--------------------------------------------------------------------------- */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* The oversized wordmark. Tight leading and a slight negative track keep a
+   140px serif from looking loose. */
+.display-hero {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+}
+
+/* Small caps label — used for eyebrows, tags and the scroll cue. */
+.label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   The house mask
+
+   The signature shape: a rectangle with a pitched roof, used to frame
+   photography. A clip-path rather than an image so it scales cleanly and
+   costs nothing.
+--------------------------------------------------------------------------- */
+.mask-house {
+  clip-path: polygon(50% 0%, 100% 26%, 100% 100%, 0% 100%, 0% 26%);
+}
+
+.mask-arch {
+  clip-path: polygon(0% 12%, 50% 0%, 100% 12%, 100% 100%, 0% 100%);
+}
+
+/* ---------------------------------------------------------------------------
+   Motion
+
+   Reveals are driven by an IntersectionObserver that sets [data-revealed] —
+   see src/hooks/useReveal.js. The initial state lives here so nothing flashes
+   into view before the observer attaches.
+--------------------------------------------------------------------------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.7s var(--ease-out-soft),
+    transform 0.7s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-reveal='blur'] {
+  filter: blur(6px);
+  transition:
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft),
+    filter 0.8s var(--ease-out-soft);
+}
+
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  will-change: auto;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee-slide {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s var(--ease-out-soft) both;
+}
+.animate-scale-up {
+  animation: scale-up 0.42s var(--ease-out-soft) both;
+}
+.animate-slide-up {
+  animation: slide-up 0.4s var(--ease-out-soft) both;
+}
+
+.animate-marquee-tape {
+  display: flex;
+  width: max-content;
+  animation: marquee-slide 42s linear infinite;
+}
+
+.animate-marquee-tape:hover,
+.animate-marquee-tape:focus-within {
+  animation-play-state: paused;
+}
+
+/* ---------------------------------------------------------------------------
+   Interaction
+
+   Two hover primitives used across the app, defined once so the timing is
+   identical everywhere.
+--------------------------------------------------------------------------- */
+
+/* An underline that draws from the left on hover, and retracts to the right
+   on leave — so it reads as a stroke rather than a fade. */
+.link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0% 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 0.4s var(--ease-out-soft);
+  padding-bottom: 2px;
+}
+
+.link-draw:hover,
+.link-draw:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Media that scales gently inside a fixed frame. The frame needs
+   overflow-hidden; this handles the rest. */
+.media-zoom {
+  transition: transform 0.85s var(--ease-out-soft);
+}
+
+.group:hover .media-zoom {
+  transform: scale(1.045);
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+
+   Everything above is decoration. Nothing here carries meaning that is lost
+   when it stops, so all of it stops.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .animate-marquee-tape {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .group:hover .media-zoom {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scrollbar
+--------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-linen);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d9cfc0;
+  border-radius: 99px;
+  border: 2px solid var(--color-linen);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ochre);
+}
