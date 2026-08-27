@@ -1,0 +1,28 @@
+# Normalise line endings for text, and mark binary files as binary so Git
+# never runs EOL conversion or a text filter over them.
+#
+# This file exists because it was missing. Every image in the project was
+# once rewritten as UTF-8 text, which replaced each byte above 0x7F with the
+# replacement character and left 94 unopenable files behind. Without these
+# rules that can happen again on any checkout from a Windows machine.
+
+*               text=auto eol=lf
+
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.webp          binary
+*.ico           binary
+*.woff          binary
+*.woff2         binary
+*.ttf           binary
+*.otf           binary
+*.pdf           binary
+*.zip           binary
+*.mp4           binary
+
+# SVG is text, but never worth merging by hand.
+*.svg           text eol=lf -merge
+
+package-lock.json  linguist-generated=true -diff
