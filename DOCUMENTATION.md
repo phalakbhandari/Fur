@@ -94,7 +94,7 @@ The last one matters. It makes the site two-sided instead of a catalogue.
 
 Two actions need you signed in: applying, and listing. Both remember what you
 were trying to do. If you click "Apply to adopt" on Goldie while signed out,
-the sign-in box says *"Sign in to apply for Goldie"*, and once you are in it
+the sign-in box says _"Sign in to apply for Goldie"_, and once you are in it
 opens Goldie's application form rather than dumping you back on the home page.
 
 ---
@@ -200,7 +200,7 @@ No password. See [section 8](#8-storage).
 ## 4. ER diagram
 
 There is no database. Data lives in JavaScript arrays and in the browser's
-`localStorage`. But the *relationships* are real, and this is how they would
+`localStorage`. But the _relationships_ are real, and this is how they would
 map onto tables if a database were added later.
 
 ```mermaid
@@ -284,14 +284,14 @@ erDiagram
 
 ### Reading the diagram
 
-| Relationship | Type | Meaning |
-| --- | --- | --- |
-| PET to PET_MEDICAL | one-to-one | Every pet has exactly one medical record. |
-| PET to PET_PERSONALITY | one-to-many | A pet has several temperament tags. |
-| PET to PET_GOOD_WITH | one-to-many | A pet has several "good with" entries. |
-| PET to APPLICATION | one-to-many | Several people can apply for the same pet. |
-| USER to APPLICATION | one-to-many | One person can apply for several pets. |
-| USER to PET | one-to-many | A person can list several pets of their own. |
+| Relationship               | Type         | Meaning                                                  |
+| -------------------------- | ------------ | -------------------------------------------------------- |
+| PET to PET_MEDICAL         | one-to-one   | Every pet has exactly one medical record.                |
+| PET to PET_PERSONALITY     | one-to-many  | A pet has several temperament tags.                      |
+| PET to PET_GOOD_WITH       | one-to-many  | A pet has several "good with" entries.                   |
+| PET to APPLICATION         | one-to-many  | Several people can apply for the same pet.               |
+| USER to APPLICATION        | one-to-many  | One person can apply for several pets.                   |
+| USER to PET                | one-to-many  | A person can list several pets of their own.             |
 | USER and PET via FAVOURITE | many-to-many | A person saves many pets; a pet is saved by many people. |
 
 **Why FAVOURITE is its own box.** A many-to-many relationship cannot be stored
@@ -331,7 +331,7 @@ const filteredPets = useMemo(() => {
     if (selectedGender !== 'All' && pet.gender !== selectedGender) return false;
     if (selectedActivity !== 'All' && pet.activityLevel !== selectedActivity) return false;
     // ...location, trait and search checks
-    return true;                       // survived every rule
+    return true; // survived every rule
   });
 }, [pets, selectedCategory, selectedAge, selectedSize /* ...and the rest */]);
 ```
@@ -365,10 +365,13 @@ export function scorePet(pet, answers) {
 
 export function rankPets(pets, answers) {
   return pets
-    .map((pet) => ({ pet, ...scorePet(pet, answers) }))   // score everything
-    .filter((entry) => entry.percent >= THRESHOLD)        // drop the hopeless
-    .sort((a, b) => b.score - a.score                     // best first
-                 || a.pet.name.localeCompare(b.pet.name)); // stable ties
+    .map((pet) => ({ pet, ...scorePet(pet, answers) })) // score everything
+    .filter((entry) => entry.percent >= THRESHOLD) // drop the hopeless
+    .sort(
+      (a, b) =>
+        b.score - a.score || // best first
+        a.pet.name.localeCompare(b.pet.name),
+    ); // stable ties
 }
 ```
 
@@ -423,22 +426,22 @@ component never touches `localStorage` directly.
 
 ### The hooks
 
-| Hook | What it does |
-| --- | --- |
-| `useAuth` | Who is signed in, and which accounts this browser knows. |
-| `useToast` | The little message that pops up bottom-right. |
-| `usePetCollection` | The catalogue: seeded pets + community listings + order. |
-| `usePersistentState` | `useState` that also saves to `localStorage`. |
-| `useReveal` | Fades sections in as you scroll. |
+| Hook                 | What it does                                             |
+| -------------------- | -------------------------------------------------------- |
+| `useAuth`            | Who is signed in, and which accounts this browser knows. |
+| `useToast`           | The little message that pops up bottom-right.            |
+| `usePetCollection`   | The catalogue: seeded pets + community listings + order. |
+| `usePersistentState` | `useState` that also saves to `localStorage`.            |
+| `useReveal`          | Fades sections in as you scroll.                         |
 
 ### The lib files
 
-| File | What it does |
-| --- | --- |
-| `storage.js` | All reading and writing of `localStorage`. |
-| `matchScore.js` | Scores and ranks pets for the quiz. |
-| `image.js` | Shrinks an uploaded photo before it is saved. |
-| `celebrate.js` | Confetti, switched off under reduced motion. |
+| File            | What it does                                  |
+| --------------- | --------------------------------------------- |
+| `storage.js`    | All reading and writing of `localStorage`.    |
+| `matchScore.js` | Scores and ranks pets for the quiz.           |
+| `image.js`      | Shrinks an uploaded photo before it is saved. |
+| `celebrate.js`  | Confetti, switched off under reduced motion.  |
 
 ### Where state lives
 
@@ -457,10 +460,10 @@ If the app grew shelter accounts, that trade would flip.
 ### Variables and data types
 
 ```js
-const [currentTab, setCurrentTab] = useState('home');   // string
+const [currentTab, setCurrentTab] = useState('home'); // string
 const [likedPetIds, setLikedPetIds] = usePersistentState(KEYS.likes, []); // array
 const [petForProfile, setPetForProfile] = useState(null); // object or null
-const isSignUp = mode === 'signup';                      // boolean
+const isSignUp = mode === 'signup'; // boolean
 ```
 
 `const` everywhere unless a value genuinely needs to change. ESLint enforces
@@ -545,7 +548,9 @@ if (currentUser) {
 }
 
 // ternary (short if/else that produces a value)
-{isSignUp ? 'Create an account' : 'Welcome back'}
+{
+  isSignUp ? 'Create an account' : 'Welcome back';
+}
 
 // guard clause: leave early instead of nesting
 if (!isOpen) return null;
@@ -591,9 +596,9 @@ pets
 ### Arrays and collections
 
 ```js
-const catalogue = [...listings, ...INITIAL_PETS];       // spread: join arrays
-const byId = new Map(all.map((pet) => [pet.id, pet]));  // Map: lookup by key
-const seen = new Set(ordered.map((pet) => pet.id));     // Set: no duplicates
+const catalogue = [...listings, ...INITIAL_PETS]; // spread: join arrays
+const byId = new Map(all.map((pet) => [pet.id, pet])); // Map: lookup by key
+const seen = new Set(ordered.map((pet) => pet.id)); // Set: no duplicates
 ```
 
 `Map` and `Set` are used in `usePetCollection.js` to re-apply a saved shuffle
@@ -623,13 +628,13 @@ There is **no server and no database**. Everything a visitor does is kept in
 
 ### The keys
 
-| Key | Holds |
-| --- | --- |
-| `furever:v5:likes` | Array of pet IDs you have saved |
-| `furever:v5:applications` | Array of application objects |
-| `furever:v5:listings` | Array of pets you have listed |
-| `furever:v5:user` | The signed-in person, and known accounts |
-| `furever:v5:order` | A saved shuffle order, as an array of pet IDs |
+| Key                       | Holds                                         |
+| ------------------------- | --------------------------------------------- |
+| `furever:v5:likes`        | Array of pet IDs you have saved               |
+| `furever:v5:applications` | Array of application objects                  |
+| `furever:v5:listings`     | Array of pets you have listed                 |
+| `furever:v5:user`         | The signed-in person, and known accounts      |
+| `furever:v5:order`        | A saved shuffle order, as an array of pet IDs |
 
 The `v5` is a schema version. If the shape of stored data changes, we raise the
 number, every old key becomes invisible, and `pruneOldVersions()` deletes them
@@ -645,7 +650,7 @@ export function read(key, fallback) {
     const raw = window.localStorage.getItem(fullKey(key));
     return raw === null ? fallback : JSON.parse(raw);
   } catch {
-    return fallback;               // storage disabled, or a corrupt value
+    return fallback; // storage disabled, or a corrupt value
   }
 }
 
@@ -654,7 +659,7 @@ export function write(key, value) {
     window.localStorage.setItem(fullKey(key), JSON.stringify(value));
     return true;
   } catch {
-    return false;                  // quota full, or storage disabled
+    return false; // quota full, or storage disabled
   }
 }
 ```
@@ -675,7 +680,8 @@ export function usePersistentState(key, initialValue) {
   const isFirstRun = useRef(true);
 
   useEffect(() => {
-    if (isFirstRun.current) {      // don't re-write what we just read
+    if (isFirstRun.current) {
+      // don't re-write what we just read
       isFirstRun.current = false;
       return;
     }
@@ -801,10 +807,14 @@ error avoids a pointless state update on every keystroke.
   id="list-pet-name"
   aria-invalid={errors.name ? 'true' : undefined}
   aria-describedby={errors.name ? 'list-pet-name-error' : undefined}
-/>
-{errors.name && (
-  <p id="list-pet-name-error" role="alert">{errors.name}</p>
-)}
+/>;
+{
+  errors.name && (
+    <p id="list-pet-name-error" role="alert">
+      {errors.name}
+    </p>
+  );
+}
 ```
 
 `aria-describedby` ties the message to the field, so a screen reader says
@@ -821,18 +831,18 @@ nothing already typed is ever cleared.
 Named for what they are, not where they are used, so `bg-linen` is readable
 without a lookup. All defined in `src/index.css`.
 
-| Token | Value | Used for |
-| --- | --- | --- |
-| `ochre` | `#EBB042` | Hero and footer background |
-| `cream` | `#FAF6F0` | The page |
-| `paper` | `#FFFFFF` | Cards and inputs |
-| `linen` | `#F2ECE3` | Recessed bands |
-| `ink` | `#222222` | Text, and the primary button |
-| `ink-muted` | `#5C564E` | Secondary text |
-| `mist` | `#EAF0FB` | The blue panel |
-| `sky` | `#D3E3EC` | Tag chips |
-| `brick` | `#A6402A` | Errors |
-| `moss` | `#3F6B45` | Success |
+| Token       | Value     | Used for                     |
+| ----------- | --------- | ---------------------------- |
+| `ochre`     | `#EBB042` | Hero and footer background   |
+| `cream`     | `#FAF6F0` | The page                     |
+| `paper`     | `#FFFFFF` | Cards and inputs             |
+| `linen`     | `#F2ECE3` | Recessed bands               |
+| `ink`       | `#222222` | Text, and the primary button |
+| `ink-muted` | `#5C564E` | Secondary text               |
+| `mist`      | `#EAF0FB` | The blue panel               |
+| `sky`       | `#D3E3EC` | Tag chips                    |
+| `brick`     | `#A6402A` | Errors                       |
+| `moss`      | `#3F6B45` | Success                      |
 
 ### Contrast is checked by the computer, not by eye
 
@@ -849,7 +859,7 @@ It found two real failures the moment it was written:
 
 One pair is deliberately below the standard: the giant `furever` wordmark,
 cream on ochre at 1.8:1. WCAG allows this for a logo. A test checks that
-nothing *else* on the page uses that pair.
+nothing _else_ on the page uses that pair.
 
 ### Type
 
@@ -876,27 +886,27 @@ Everything stops under `prefers-reduced-motion`. There is a test for it.
 `npm test` runs 28 tests: 12 unit tests for the quiz scoring, and 16 Playwright
 tests against a real production build on a desktop and a mobile screen size.
 
-| Test | Checks |
-| --- | --- |
-| Home page loads | No console errors, no failed requests, **no image with zero width** |
-| Favourite survives reload | Saving works and the catalogue order is stable |
-| Listing needs sign-in | The gate holds and explains itself |
-| Dialog focus | Focus moves inside on open, Escape closes |
-| Empty listing refused | Every required field explains itself |
-| Wordmark contrast | Only the logo uses cream-on-ochre |
-| Reduced motion | Nothing is left invisible when animation is off |
-| Catalogue reachable | Navigation works on both screen sizes |
-| Quiz scoring | Full marks with no answers, near misses ranked lower, stable ties |
+| Test                      | Checks                                                              |
+| ------------------------- | ------------------------------------------------------------------- |
+| Home page loads           | No console errors, no failed requests, **no image with zero width** |
+| Favourite survives reload | Saving works and the catalogue order is stable                      |
+| Listing needs sign-in     | The gate holds and explains itself                                  |
+| Dialog focus              | Focus moves inside on open, Escape closes                           |
+| Empty listing refused     | Every required field explains itself                                |
+| Wordmark contrast         | Only the logo uses cream-on-ochre                                   |
+| Reduced motion            | Nothing is left invisible when animation is off                     |
+| Catalogue reachable       | Navigation works on both screen sizes                               |
+| Quiz scoring              | Full marks with no answers, near misses ranked lower, stable ties   |
 
 ### Other checks
 
-| Command | Checks |
-| --- | --- |
-| `npm run lint` | ESLint, including accessibility rules, as errors |
-| `npm run format:check` | Prettier formatting |
-| `npm run check:assets` | Images are not corrupt and are within a size budget |
-| `npm run check:contrast` | Every colour pair meets WCAG AA |
-| `npm run verify` | All of the above, then a build |
+| Command                  | Checks                                              |
+| ------------------------ | --------------------------------------------------- |
+| `npm run lint`           | ESLint, including accessibility rules, as errors    |
+| `npm run format:check`   | Prettier formatting                                 |
+| `npm run check:assets`   | Images are not corrupt and are within a size budget |
+| `npm run check:contrast` | Every colour pair meets WCAG AA                     |
+| `npm run verify`         | All of the above, then a build                      |
 
 All of it runs in GitHub Actions on every push.
 
@@ -975,5 +985,5 @@ Stated plainly, because pretending otherwise would be worse.
 2. Shelter accounts, so a shelter manages its own listings and sees applications.
 3. Hosted images with responsive sizes.
 4. Application status that a shelter actually moves along.
-5. Saved searches and alerts. *"Tell me when a calm, apartment-friendly cat is
-   listed in Indiranagar"* is the feature that would bring people back.
+5. Saved searches and alerts. _"Tell me when a calm, apartment-friendly cat is
+   listed in Indiranagar"_ is the feature that would bring people back.

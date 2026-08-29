@@ -132,10 +132,10 @@ saved data" instead of a blank white page.
 **Accessing them:**
 
 ```js
-pet.name                        // dot notation
-pet.medicalInfo.vaccinated      // nested
-pet.personality[0]              // first item of the array inside
-pet.medicalInfo?.healthNotes    // safe access if medicalInfo might be missing
+pet.name; // dot notation
+pet.medicalInfo.vaccinated; // nested
+pet.personality[0]; // first item of the array inside
+pet.medicalInfo?.healthNotes; // safe access if medicalInfo might be missing
 ```
 
 ---
@@ -159,7 +159,7 @@ export function shuffleArray(array) {
 
 > A plain function. Takes an array, returns a new shuffled one. It copies first
 > with `[...array]` so the original is not changed, which is called keeping the
-> function *pure*.
+> function _pure_.
 
 ### 2. An arrow function — `src/App.jsx`
 
@@ -182,7 +182,7 @@ onChange={update('name')}
 onChange={update('breed')}
 ```
 
-> `update('name')` runs and returns a *new function* that already knows it is
+> `update('name')` runs and returns a _new function_ that already knows it is
 > for the name field. That is why one handler serves nine inputs instead of
 > writing nine handlers.
 >
@@ -198,7 +198,7 @@ onChange={update('breed')}
 ```js
 for (let i = result.length - 1; i > 0; i--) {
   const j = Math.floor(Math.random() * (i + 1));
-  [result[i], result[j]] = [result[j], result[i]];   // swap
+  [result[i], result[j]] = [result[j], result[i]]; // swap
 }
 ```
 
@@ -212,22 +212,22 @@ for (let i = result.length - 1; i > 0; i--) {
 
 **Then show the array loops:**
 
-| Loop | Where | What it does |
-| --- | --- | --- |
-| `.map()` | `HomeView.jsx` | Turns each pet into a `<PetCard>` |
-| `.filter()` | `PetBrowseGrid.jsx` | Keeps only pets matching the filters |
-| `.forEach()` | `lib/storage.js` | Deletes each stale key, returns nothing |
-| `.reduce()` | `lib/matchScore.js` | Adds all the weights into one total |
-| `.some()` | `useAuth.js` | True if any account already has that email |
-| `.sort()` | `lib/matchScore.js` | Orders pets best match first |
-| `for...of` | `scripts/check-contrast.mjs` | Walks the list of colour pairs |
+| Loop         | Where                        | What it does                               |
+| ------------ | ---------------------------- | ------------------------------------------ |
+| `.map()`     | `HomeView.jsx`               | Turns each pet into a `<PetCard>`          |
+| `.filter()`  | `PetBrowseGrid.jsx`          | Keeps only pets matching the filters       |
+| `.forEach()` | `lib/storage.js`             | Deletes each stale key, returns nothing    |
+| `.reduce()`  | `lib/matchScore.js`          | Adds all the weights into one total        |
+| `.some()`    | `useAuth.js`                 | True if any account already has that email |
+| `.sort()`    | `lib/matchScore.js`          | Orders pets best match first               |
+| `for...of`   | `scripts/check-contrast.mjs` | Walks the list of colour pairs             |
 
 **If asked which to use when:**
 
 > `for` when I need the index or want to count in an unusual way. `.map()` when
 > I want a new list the same length. `.filter()` when I want a shorter list.
 > `.reduce()` when I want one value out of many. They all loop; the name says
-> what the loop is *for*, which makes the code easier to read.
+> what the loop is _for_, which makes the code easier to read.
 
 ---
 
@@ -236,21 +236,26 @@ for (let i = result.length - 1; i > 0; i--) {
 **Open:** `src/App.jsx`, the `requestApplication` function.
 
 ```js
-const requestApplication = useCallback((pet) => {
-  setPetForProfile(null);
-  if (currentUser) {
-    setPetForApplication(pet);                 // signed in: open the form
-  } else {
-    setSignInIntent({ action: 'apply', pet }); // signed out: remember, then sign in
-  }
-}, [currentUser]);
+const requestApplication = useCallback(
+  (pet) => {
+    setPetForProfile(null);
+    if (currentUser) {
+      setPetForApplication(pet); // signed in: open the form
+    } else {
+      setSignInIntent({ action: 'apply', pet }); // signed out: remember, then sign in
+    }
+  },
+  [currentUser],
+);
 ```
 
 Then the other three kinds:
 
 ```js
 // ternary — a short if/else that produces a value
-{isSignUp ? 'Create an account' : 'Welcome back'}
+{
+  isSignUp ? 'Create an account' : 'Welcome back';
+}
 
 // guard clause — leave early instead of wrapping everything in an if
 if (!isOpen) return null;
@@ -270,9 +275,9 @@ const notes = pet.medicalInfo?.healthNotes ?? 'Not recorded';
 **Open:** `src/hooks/usePetCollection.js`
 
 ```js
-const all = [...listings, ...INITIAL_PETS];             // spread: join arrays
-const byId = new Map(all.map((pet) => [pet.id, pet]));  // Map: look up by key
-const seen = new Set(ordered.map((pet) => pet.id));     // Set: no duplicates
+const all = [...listings, ...INITIAL_PETS]; // spread: join arrays
+const byId = new Map(all.map((pet) => [pet.id, pet])); // Map: look up by key
+const seen = new Set(ordered.map((pet) => pet.id)); // Set: no duplicates
 ```
 
 **Say:**
@@ -383,7 +388,7 @@ export function usePersistentState(key, initialValue) {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      return;                    // don't immediately re-write what we just read
+      return; // don't immediately re-write what we just read
     }
     write(key, value);
   }, [key, value]);
@@ -442,8 +447,14 @@ function validate(form, photo) {
   id="list-pet-name"
   aria-invalid={errors.name ? 'true' : undefined}
   aria-describedby={errors.name ? 'list-pet-name-error' : undefined}
-/>
-{errors.name && <p id="list-pet-name-error" role="alert">{errors.name}</p>}
+/>;
+{
+  errors.name && (
+    <p id="list-pet-name-error" role="alert">
+      {errors.name}
+    </p>
+  );
+}
 ```
 
 > `aria-describedby` links the message to the field, so a screen reader reads
@@ -554,16 +565,21 @@ export const PetCard = ({ pet, isFavorite, onToggleFavorite, onSelectPet }) => (
 ```js
 useEffect(() => {
   const handleKeyDown = (event) => {
-    if (document.querySelector('[role="dialog"]')) return;   // a dialog owns the keyboard
+    if (document.querySelector('[role="dialog"]')) return; // a dialog owns the keyboard
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
-    if (event.key === 'ArrowLeft') { event.preventDefault(); swipeRef.current('left'); }
-    else if (event.key === 'ArrowRight') { event.preventDefault(); swipeRef.current('right'); }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      swipeRef.current('left');
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      swipeRef.current('right');
+    }
   };
 
   window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);   // cleanup
+  return () => window.removeEventListener('keydown', handleKeyDown); // cleanup
 }, []);
 ```
 
@@ -639,7 +655,7 @@ try {
   window.localStorage.setItem(fullKey(key), JSON.stringify(value));
   return true;
 } catch {
-  return false;   // quota full, or storage disabled
+  return false; // quota full, or storage disabled
 }
 ```
 
@@ -696,7 +712,7 @@ automatically on GitHub with every push.
 
 **Say:**
 
-> There is no database, so this shows how the data *would* be laid out as
+> There is no database, so this shows how the data _would_ be laid out as
 > tables. Seven boxes: USER, PET, PET_MEDICAL, PET_PERSONALITY, PET_GOOD_WITH,
 > APPLICATION, and a join table FAVOURITE.
 
