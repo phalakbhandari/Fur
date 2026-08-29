@@ -118,7 +118,7 @@ saved data" instead of a blank white page.
 
 **Say:**
 
-> Every pet is an object: named values grouped together. There are 31 of them
+> Every pet is an object: named values grouped together. There are 50 of them
 > in an array.
 >
 > Two things worth pointing out. `personality` is an **array inside an object**,
@@ -283,7 +283,7 @@ const seen = new Set(ordered.map((pet) => pet.id));     // Set: no duplicates
 >
 > A `Map` stores key-value pairs and finds a value instantly. I use it to
 > re-apply a saved shuffle order: without it, finding each pet by ID would mean
-> scanning the whole array 31 times.
+> scanning the whole array 50 times.
 >
 > A `Set` only ever holds one of each value, so `seen.has(id)` is a fast way to
 > ask "have I already added this pet?"

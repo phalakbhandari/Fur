@@ -318,7 +318,7 @@ pets, and a panel inviting you to list a pet.
 
 ### View 2 — Browse (`PetBrowseGrid.jsx`)
 
-All 31 pets with filters. One `.filter()` runs over the list, and inside it
+All 50 pets with filters. One `.filter()` runs over the list, and inside it
 each rule returns `false` as soon as a pet fails. Getting out early is cheaper
 and much easier to read than one long boolean expression.
 
@@ -414,7 +414,7 @@ src/
 │   └── ui/           Small reusable pieces: Button, Tag, Reveal, Glyph...
 ├── hooks/            Reusable behaviour with state in it.
 ├── lib/              Helpers that touch the outside world.
-├── data/             The 31 seeded pets.
+├── data/             The 50 seeded pets.
 └── utils/            Pure functions that do one thing.
 ```
 
@@ -690,7 +690,7 @@ Used exactly like `useState`, but the value survives a refresh.
 
 ### What is deliberately not stored
 
-The 31 seeded pets. They ship with the code, so saving a copy would waste the
+The 50 seeded pets. They ship with the code, so saving a copy would waste the
 quota and lock a visitor to an old catalogue after an update. Only community
 listings and the chosen order are saved.
 

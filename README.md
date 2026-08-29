@@ -47,7 +47,7 @@ Running the tests needs the browser once: `npx playwright install chromium`.
 ## What it does
 
 **Browse.** Filter by species, age, size, locality and temperament, in a grid
-or a detail list. 31 pets, searchable.
+or a detail list. 50 pets, searchable.
 
 **Swipe.** A card deck for when you would rather react than filter. Drag, or
 use the arrow keys. Right saves, left passes, and you can undo.
