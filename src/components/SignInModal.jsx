@@ -24,13 +24,14 @@ function nameFromEmail(email) {
 }
 
 /**
- * Account entry for the demo.
+ * Account entry.
  *
- * There is no auth server, so this deliberately does not pretend to be
- * secure: accounts live in this browser and passwords are never stored, only
- * checked for presence. It exists so the app can tell "this visitor" from
- * "some visitor" when attributing applications and listings — swapping it for
- * a real identity provider means replacing `onAuthenticate`, nothing else.
+ * The form validates, then hands the credentials to `onAuthenticate`, which
+ * hashes or verifies them and resolves to `{ ok }` or `{ ok: false, error }`.
+ * A wrong password comes back here as a message rather than a silent no-op.
+ *
+ * Deriving a PBKDF2 key takes a few hundred milliseconds by design, which is
+ * why the submit button reports that it is working.
  */
 export const SignInModal = ({ isOpen, onClose, onAuthenticate, knownEmails = [], reason }) => {
   const [mode, setMode] = useState('signin');
@@ -62,7 +63,7 @@ export const SignInModal = ({ isOpen, onClose, onAuthenticate, knownEmails = [],
     setError(null);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
 
@@ -95,13 +96,21 @@ export const SignInModal = ({ isOpen, onClose, onAuthenticate, knownEmails = [],
 
     setIsSubmitting(true);
 
-    onAuthenticate({
-      id: `user-${trimmedEmail.replace(/[^a-z0-9]/g, '')}`,
+    const result = await onAuthenticate({
+      mode,
       name: isSignUp ? name.trim() : nameFromEmail(trimmedEmail),
       email: trimmedEmail,
+      password,
     });
 
     setIsSubmitting(false);
+
+    if (!result?.ok) {
+      setError(result?.error ?? 'Something went wrong. Try again.');
+      setPassword('');
+      return;
+    }
+
     reset();
   };
 
@@ -200,7 +209,7 @@ export const SignInModal = ({ isOpen, onClose, onAuthenticate, knownEmails = [],
             className="w-full py-3.5 rounded-xl bg-ink hover:bg-[#111] text-cream font-semibold text-sm tracking-wider border border-ink/10 shadow-card hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <PawIcon className="w-4 h-4 fill-cream" />
-            <span>{isSignUp ? 'Create account' : 'Sign in'}</span>
+            <span>{isSubmitting ? 'Checking...' : isSignUp ? 'Create account' : 'Sign in'}</span>
           </button>
 
           <p className="text-center text-xs font-bold text-ink-muted">
@@ -215,8 +224,8 @@ export const SignInModal = ({ isOpen, onClose, onAuthenticate, knownEmails = [],
           </p>
 
           <p className="text-[11px] text-ink-muted font-bold leading-relaxed text-center border-t border-ink/10 pt-4">
-            Demo accounts are stored in this browser and nowhere else. Passwords are checked for
-            length, never saved.
+            Accounts are stored in this browser and nowhere else. Your password is salted and hashed
+            with PBKDF2 before it is saved, so the password itself never is.
           </p>
         </form>
       </div>

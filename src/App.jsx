@@ -49,7 +49,7 @@ export default function App() {
   // freshly mounted content is picked up.
   useReveal([currentTab]);
 
-  const { currentUser, knownEmails, signIn, signOut } = useAuth();
+  const { currentUser, knownEmails, signIn, signUp, signOut } = useAuth();
   const { toast, showToast } = useToast();
   const { pets, shuffle, addListing } = usePetCollection();
 
@@ -134,15 +134,24 @@ export default function App() {
     }
   }, [currentUser]);
 
+  /**
+   * Runs the credential check, and only routes the visitor onward if it
+   * passed. A failure is handed back to the form to display.
+   */
   const handleAuthenticated = useCallback(
-    (user) => {
-      signIn(user);
+    async (credentials) => {
+      const result =
+        credentials.mode === 'signup' ? await signUp(credentials) : await signIn(credentials);
+
+      if (!result.ok) return result;
+
       const intent = signInIntent;
       setSignInIntent(null);
       if (intent?.action === 'apply' && intent.pet) setPetForApplication(intent.pet);
       if (intent?.action === 'list') setIsListPetOpen(true);
+      return result;
     },
-    [signIn, signInIntent],
+    [signIn, signUp, signInIntent],
   );
 
   const handleSignOut = useCallback(() => {

@@ -10,7 +10,7 @@
 const PREFIX = 'furever:';
 
 /** Bump when the shape of stored data changes in a non-backwards-compatible way. */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export const KEYS = {
   user: 'user',
