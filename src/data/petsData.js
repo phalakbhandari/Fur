@@ -767,7 +767,7 @@ const RAW_PETS = [
     goodWith: ['Desks', 'Apartments', 'Night Owls'],
     status: 'AVAILABLE',
     image:
-      'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1676918555382-fcd06a483e25?auto=format&fit=crop&w=1000&q=80',
     medicalInfo: {
       vaccinated: false,
       spayedNeutered: false,
