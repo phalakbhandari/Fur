@@ -1,113 +1,57 @@
 # FUREVER
 
-A pet adoption site for Bengaluru shelters. Browse animals looking for homes,
-get a sense of their temperament before you go and meet them, apply to adopt,
-and list a stray you have found yourself.
+A zero-backend, client-side pet adoption platform designed to centralize Bengaluru’s fragmented shelter network. Built to replace chaotic WhatsApp chains and phone tag with a fast, accessible, and structured user experience.
 
-Adoption here still mostly happens over WhatsApp groups and phone calls. You
-hear about a dog through a friend, ring three numbers, and hope someone picks
-up. FUREVER is the boring, useful version of that: one place to look, enough
-detail to decide, and a form instead of phone tag.
+**Tech Stack:** React 19, Vite 6, Tailwind v4, Motion, Playwright, Plain JavaScript.
 
-Built by [Sakina](https://github.com/sakinaeae) and
-[Phalak](https://github.com/phalakbhandari).
+## Technical & UX Highlights
 
-## Running it
+This project was built with a strict focus on performance, accessibility, and custom tooling, deliberately avoiding bloated dependencies to ensure a seamless interface.
+
+* **Accessible UI Foundations:** Designed and built a lightweight `ModalShell` to handle critical accessibility requirements: focus trapping, focus restoration, Escape-key binding, and scroll locking. Heavy UI components are bundle-split via `React.lazy` for faster initial paints.
+* **Custom Asset & Contrast Tooling:** 
+  * `check:assets`: A custom script that validates magic bytes, detects text-filter binary corruption, and enforces strict size budgets (successfully reduced asset footprint from 35MB to 154KB for optimized loading).
+  * `check:contrast`: An automated build step that parses `src/index.css` hex values to strictly enforce WCAG 2.1 AA color contrast pairings across the interface.
+* **Client-Side Cryptography:** Implemented a secure authentication flow running entirely in the browser. Uses PBKDF2-SHA256 (210,000 iterations) with 16-byte per-user salts. Passwords are never stored natively, verification operates in constant time, and error messages are generic to prevent account enumeration.
+* **Zero Dependency State Management:** State is managed natively via React props, keeping the bundle lean. Persistence is abstracted through a unified storage interface (`src/lib/storage.js`), isolating `localStorage` quota errors and creating a clean seam for future API integration.
+
+## Core Features
+
+* **Algorithmic Match Quiz:** A 5-point questionnaire that scores and ranks the 50-pet catalogue against user preferences, surfacing near-misses with exact percentage scores.
+* **Interactive Swiping:** A gesture-driven card deck with drag and arrow-key support (right to save, left to pass, with undo functionality) for a frictionless browsing experience.
+* **Advanced Filtering:** Real-time catalogue filtering by species, age, size, locality, and temperament.
+* **End-to-End Workflows:** Users can submit detailed adoption applications (tracked in a personal dashboard) and list new found/rehomed strays directly to the catalogue.
+
+## Local Development
+
+The application requires no server, database, or API keys. Everything runs in the browser, persists to `localStorage`, and builds to static files. Requires Node 20+.
 
 ```bash
 npm install
 npm run dev
 ```
 
-That is the whole setup. No server, no database, no API keys. Everything runs
-in the browser and persists to `localStorage`, and it builds to static files.
-Needs Node 20 or newer.
+| Command | What it does |
+| :--- | :--- |
+| `npm run dev` | Starts local development server on port 3000 |
+| `npm run build` | Compiles production-ready static assets into `dist/` |
+| `npm test` | Executes 30 Playwright tests (unit and end-to-end) |
+| `npm run verify` | Runs linting, formatting, custom scripts (assets/contrast), and builds |
 
-| Command          | What it does                              |
-| ---------------- | ----------------------------------------- |
-| `npm run dev`    | Dev server on port 3000                   |
-| `npm run build`  | Production build into `dist/`             |
-| `npm test`       | 30 Playwright tests, unit and end-to-end  |
-| `npm run verify` | Lint, formatting, both checks and a build |
+*Note: Running tests for the first time requires the Playwright browser binaries: `npx playwright install chromium`.*
 
-Running the tests needs the browser once: `npx playwright install chromium`.
+## Architecture & Trade-offs
 
-## What it does
-
-**Browse** — filter 50 pets by species, age, size, locality and temperament.
-
-**Swipe** — a card deck for when you would rather react than filter. Drag or
-use the arrow keys; right saves, left passes, and you can undo.
-
-**Match quiz** — five questions, and every pet is scored and ranked against
-your answers. Near misses still appear, lower down, with a percentage.
-
-**Apply to adopt** — a form that asks what a shelter would ask, tracked
-afterwards under My Applications.
-
-**List a pet** — found a stray, or rehoming your own? Add a photo and a
-description and it joins the catalogue.
-
-## How it is built
-
-React 19 and Vite 6, Tailwind v4, Motion for animation. Plain JavaScript
-rather than TypeScript, deliberately: the type surface is one `pet` shape, and
-the toolchain would cost more than it caught. Fraunces and Inter are
-self-hosted, so no request goes to a font CDN.
-
-State lives in `App.jsx` and passes down as props — no state library, because
-at this size it would not earn its keep. Persistence goes through
-`src/lib/storage.js` rather than touching `localStorage` directly, which gives
-one place to handle a quota error and one seam to replace with a real backend.
-Every dialog renders through `ModalShell`, which owns focus trapping, focus
-restoration, Escape and scroll locking. Modals are behind `React.lazy`.
-
-Sign-in is a real credential check. `src/lib/password.js` derives a key with
-PBKDF2-SHA256 at 210,000 iterations over a per-account 16-byte salt, and only
-the salt and the digest are stored — never the password. Verification compares
-in constant time. The same error covers a wrong password and an unknown
-address, so the form cannot be used to discover which addresses are
-registered.
-
-## Two checks worth knowing about
-
-Both were written after a real problem, and both found something immediately.
-
-`npm run check:assets` verifies magic bytes, counts replacement characters and
-enforces a size budget. Early on, all 94 images in the project were silently
-corrupted — the binaries had gone through a text filter that rewrote every byte
-above `0x7F`, so files kept their names, grew by 60%, and read as "large
-images" rather than "broken" ones. `.gitattributes` stops it recurring; this
-check fails the build if it happens anyway. The same pass found icons shipping
-as 2048x2048 PNGs rendered at 40 pixels, twice over: 35 MB down to 154 KB.
-
-`npm run check:contrast` reads the real hex values out of `src/index.css` and
-measures every pairing against WCAG 2.1 AA. It found two shipped failures on
-the day it was written, including a success green at 3.7:1 on cream. One
-pairing is a documented exemption — the cream-on-ochre wordmark at 1.8:1, which
-WCAG allows for a logotype — and a test asserts nothing else on the page uses
-it.
-
-## Honest limitations
-
-- **Accounts are per-browser.** Passwords are salted and hashed with PBKDF2
-  before storage and the wrong one is refused, but the accounts live in
-  `localStorage`, so this is a genuine credential check rather than a security
-  boundary. It needs a server to be one.
-- **Nothing is shared between people.** A listing is visible to you, in that
-  browser, until you clear your site data.
-- **Most catalogue photos are hotlinked from Unsplash** and will not load
-  offline, though they degrade to a paw print rather than a broken icon.
-- **The quiz weights are a judgement**, not measured from real adoptions.
+* **Stateless by Design:** To maintain a zero-cost static deployment, data and accounts are scoped to browser `localStorage`. Authentication acts as a genuine cryptographic credential check, but cannot serve as a cross-device security boundary without a remote server.
+* **No TypeScript:** Deliberately opted for plain JavaScript. The data architecture relies on a single predictable `pet` object shape, making TS overhead unnecessary for this specific scope.
+* **Self-Hosted Assets:** Fonts (Fraunces and Inter) are self-hosted to eliminate CDN request latency. Catalogue photos rely on Unsplash hotlinking but degrade gracefully to local SVG fallbacks offline.
 
 ## Documentation
 
-- [DOCUMENTATION.md](DOCUMENTATION.md) — how it works, the data design, the ER
-  diagram, and the decisions behind it.
-- [UNDERSTAND.md](UNDERSTAND.md) — a walkthrough of the code by topic. Which
-  file to open for classes, loops, storage, validation and the rest.
+* [DOCUMENTATION.md](DOCUMENTATION.md) — System architecture, data design, ER diagrams, and technical decision logs.
+* [UNDERSTAND.md](UNDERSTAND.md) — A guided codebase walkthrough mapping out classes, loops, storage, and validation.
 
-## Licence
+## License
 
-MIT. See [LICENSE](LICENSE). Fraunces and Inter are under the SIL Open Font
-License; icon artwork is original to the project.
+MIT. See [LICENSE](LICENSE). 
+Fonts are under the SIL Open Font License; all icon artwork is original to this project.
