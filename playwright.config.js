@@ -24,7 +24,7 @@ export default defineConfig({
   // Tests run against the production build, not the dev server — that is what
   // real visitors get, and it catches anything that only breaks after bundling.
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4173',
+    command: 'npm run preview -- --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
