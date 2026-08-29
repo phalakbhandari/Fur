@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { INITIAL_PETS } from '../data/petsData';
+import { PawIcon } from './PawDecorations';
 import { PetImage } from './PetImage';
 import { Button } from './ui/Button';
 import { Reveal } from './ui/Reveal';
@@ -8,6 +11,54 @@ import { Reveal } from './ui/Reveal';
  * means the hero is blank whenever that host is slow, blocked, or offline.
  */
 const HERO_PHOTO = '/pets/daisy.jpg';
+
+/**
+ * One face per species, for the strip beside the caption plate.
+ *
+ * The hero photograph is a dog, which on its own makes the site look like a
+ * dog site. It is not — there are cats, rabbits, birds and small pets in the
+ * catalogue. Rather than crowd the house mask with a group photograph, where
+ * every animal ends up too small to read, the breadth is stated separately at
+ * thumbnail size, where four faces are exactly enough.
+ */
+const SPECIES_STRIP = ['Cat', 'Rabbit', 'Bird', 'Other']
+  .map((type) => INITIAL_PETS.find((pet) => pet.animalType === type && pet.status === 'AVAILABLE'))
+  .filter(Boolean);
+
+// The catalogue asks for photographs at card size. These are 40px circles.
+const thumbnail = (url) => url.replace('w=1000', 'w=160');
+
+/**
+ * A 40px face, with the same graceful failure the rest of the site uses.
+ *
+ * These four are the only hotlinked images on the first screen, so a slow or
+ * blocked host would otherwise leave four broken-image glyphs sitting on the
+ * hero. It falls back to a paw on linen, which reads as a deliberate dot.
+ */
+const SpeciesThumb = ({ pet }) => {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-linen text-ink/30 ring-2 ring-cream">
+        <PawIcon className="h-4 w-4 fill-current" />
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={thumbnail(pet.image)}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className="h-10 w-10 rounded-full bg-linen object-cover ring-2 ring-cream transition-transform duration-300 ease-out-soft hover:-translate-y-1"
+    />
+  );
+};
 
 /**
  * The hero.
@@ -110,6 +161,23 @@ export const HeroSection = ({ onFindYourMatch, onExplorePets, availableCount }) 
             <p className="label text-ink-muted">Looking for a home</p>
             <p className="mt-1 font-display text-2xl leading-none text-ink">Daisy</p>
             <p className="mt-1.5 text-xs text-ink-muted">Labrador Indie mix · 1 yr</p>
+          </div>
+
+          {/* Species strip. Hidden below sm, where the caption plate already
+              takes the full width of the photograph. */}
+          <div className="hidden items-center gap-3 rounded-full bg-cream/95 py-2.5 pl-3 pr-5 shadow-card backdrop-blur-sm sm:flex">
+            <ul className="flex -space-x-2.5">
+              {SPECIES_STRIP.map((pet) => (
+                <li key={pet.id}>
+                  <SpeciesThumb pet={pet} />
+                </li>
+              ))}
+            </ul>
+            <p className="label leading-snug text-ink-muted">
+              Cats, rabbits, birds
+              <br />
+              and small pets too
+            </p>
           </div>
         </div>
       </Reveal>
