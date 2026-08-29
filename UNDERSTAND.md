@@ -324,11 +324,16 @@ Answer this one carefully and honestly.
 
 **If asked "is the login real?"**
 
-> No, and the site says so on the sign-in box. It stores a name and an email so
-> applications and listings can be labelled, and so there is something to check
-> before you apply. **No password is ever stored.** It is checked for length and
-> thrown away. Storing a fake password, even locally, would teach a bad habit
-> and become a real risk the moment somebody reused a real password.
+> The password check is real. `src/lib/password.js` salts the password with 16
+> random bytes and runs PBKDF2-SHA256 over it 210,000 times; only that salt and
+> the resulting digest are saved. **The password itself is never stored**, so
+> reading the browser's storage does not reveal it — which matters, because
+> people reuse passwords. A wrong password produces a different digest and is
+> refused.
+>
+> What it is not is a security boundary. The accounts live in `localStorage` in
+> one browser, so somebody with devtools can edit their own record. Saying that
+> out loud is the honest answer; a server is what makes it a real one.
 >
 > All of that lives in `src/hooks/useAuth.js`, which is the only file that would
 > change if we added real authentication.
@@ -678,7 +683,7 @@ return <img src={src} onError={() => setFailed(true)} ... />;
 
 ## Q: How do you test it?
 
-**Run it:** `npm test` — 28 tests pass.
+**Run it:** `npm test` — 30 tests pass.
 
 **Say:**
 

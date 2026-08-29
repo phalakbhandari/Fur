@@ -86,6 +86,37 @@ test.describe('FUREVER', () => {
     await expect(dialog).toContainText(/sign in to list a pet/i);
   });
 
+  /**
+   * The password is hashed with PBKDF2 and verified against the stored digest.
+   * This test exists because the previous version of sign-in accepted any
+   * non-empty password, for any address, including one that had never
+   * registered.
+   */
+  test('credentials that do not match an account are refused', async ({ page }) => {
+    await page.goto('/');
+
+    await page
+      .getByRole('button', { name: /list a pet/i })
+      .first()
+      .click();
+
+    await page.fill('#signin-email', 'asha@example.com');
+    await page.fill('#signin-password', 'not-my-password');
+    await page.locator('[role="dialog"] button[type="submit"]').click();
+
+    await expect(page.getByRole('alert')).toContainText(/do not match/i);
+    await expect(page.getByRole('dialog')).toContainText(/welcome back/i);
+
+    // The same address works once it actually has an account.
+    await page.getByRole('button', { name: /create one/i }).click();
+    await page.fill('#signin-name', 'Asha');
+    await page.fill('#signin-email', 'asha@example.com');
+    await page.fill('#signin-password', 'correct-horse');
+    await page.locator('[role="dialog"] button[type="submit"]').click();
+
+    await expect(page.getByRole('dialog')).toContainText(/list a pet/i);
+  });
+
   test('a dialog traps focus and closes on Escape', async ({ page }) => {
     await page.goto('/');
     await page
@@ -113,6 +144,8 @@ test.describe('FUREVER', () => {
       .first()
       .click();
 
+    await page.getByRole('button', { name: /create one/i }).click();
+    await page.fill('#signin-name', 'Tester');
     await page.fill('#signin-email', 'tester@example.com');
     await page.fill('#signin-password', 'hunter2');
     await page.locator('[role="dialog"] button[type="submit"]').click();

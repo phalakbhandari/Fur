@@ -27,7 +27,7 @@ Needs Node 20 or newer.
 | ---------------- | ----------------------------------------- |
 | `npm run dev`    | Dev server on port 3000                   |
 | `npm run build`  | Production build into `dist/`             |
-| `npm test`       | 28 Playwright tests, unit and end-to-end  |
+| `npm test`       | 30 Playwright tests, unit and end-to-end  |
 | `npm run verify` | Lint, formatting, both checks and a build |
 
 Running the tests needs the browser once: `npx playwright install chromium`.
@@ -62,6 +62,13 @@ one place to handle a quota error and one seam to replace with a real backend.
 Every dialog renders through `ModalShell`, which owns focus trapping, focus
 restoration, Escape and scroll locking. Modals are behind `React.lazy`.
 
+Sign-in is a real credential check. `src/lib/password.js` derives a key with
+PBKDF2-SHA256 at 210,000 iterations over a per-account 16-byte salt, and only
+the salt and the digest are stored — never the password. Verification compares
+in constant time. The same error covers a wrong password and an unknown
+address, so the form cannot be used to discover which addresses are
+registered.
+
 ## Two checks worth knowing about
 
 Both were written after a real problem, and both found something immediately.
@@ -83,8 +90,10 @@ it.
 
 ## Honest limitations
 
-- **No real authentication.** Sign-in stores a name and email and checks
-  nothing. It exists so applications can be attributed.
+- **Accounts are per-browser.** Passwords are salted and hashed with PBKDF2
+  before storage and the wrong one is refused, but the accounts live in
+  `localStorage`, so this is a genuine credential check rather than a security
+  boundary. It needs a server to be one.
 - **Nothing is shared between people.** A listing is visible to you, in that
   browser, until you clear your site data.
 - **Most catalogue photos are hotlinked from Unsplash** and will not load

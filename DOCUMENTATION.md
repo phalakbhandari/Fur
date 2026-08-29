@@ -193,7 +193,8 @@ Created when someone submits the adoption form.
 }
 ```
 
-No password. See [section 8](#8-storage).
+The password is not here. Only its salt and PBKDF2 digest are, on the account
+record. See [section 8](#8-storage).
 
 ---
 
@@ -716,10 +717,11 @@ What that means:
 
 - Nothing is shared between people. A listing you create is visible to you, in
   that browser, until you clear your site data.
-- Sign-in is not real authentication. It stores a name and an email so
-  applications and listings can be labelled, and so the apply flow has
-  something to check. **No password is ever stored.** It is checked for length
-  and thrown away.
+- Sign-in verifies a real credential. `src/lib/password.js` derives a
+  PBKDF2-SHA256 key at 210,000 iterations over a random 16-byte per-account
+  salt; the salt and digest are stored, **the password never is**. A wrong
+  password is refused. Because the accounts sit in `localStorage`, this is a
+  credential check rather than a trust boundary — that needs a server.
 - To add a real backend you would replace `src/lib/storage.js` with API calls
   and make the hooks asynchronous. Nothing else would need to change. That is
   the whole reason storage was put behind one file.
@@ -883,7 +885,7 @@ Everything stops under `prefers-reduced-motion`. There is a test for it.
 
 ### Automated tests
 
-`npm test` runs 28 tests: 12 unit tests for the quiz scoring, and 16 Playwright
+`npm test` runs 30 tests: 12 unit tests for the quiz scoring, and 18 Playwright
 tests against a real production build on a desktop and a mobile screen size.
 
 | Test                      | Checks                                                              |
@@ -968,8 +970,8 @@ management at all. Fixed rather than switched off.
 
 Stated plainly, because pretending otherwise would be worse.
 
-- **No real authentication.** Sign-in stores a name and email and verifies
-  nothing.
+- **Accounts are per-browser.** Passwords are hashed with PBKDF2 and verified,
+  but `localStorage` is not a trust boundary.
 - **Nothing is shared between people.** A listing exists in one browser.
 - **Most catalogue photos come from Unsplash** and will not load offline. The
   page falls back to a paw print rather than a broken image, but the real fix
